@@ -203,6 +203,40 @@ DLL bool h3dutCreateTGAImage( const unsigned char *pixels, int width, int height
 */
 DLL bool h3dutScreenshot( const char *filename );
 
+/* Function: h3dutGetScreenshotParam
+   Return width and height for current screenshot.
+
+   Details:
+   This function is useful to allocate arrays with the right size for
+   h3dutScreenshotRaw.
+
+   Parameters:
+   width: will contain the screenshot width
+   height: will contain the screenshot height
+
+   Returns:
+   None
+*/
+DLL void h3dutGetScreenshotParam( int*,  int*);
+
+/* Function: h3dutScreenshotRaw
+   Copies the content of the backbuffer into a user supplied array.
+
+   Details:
+   The backbuffer data (in RGBA float32) format are in the first array, the RGB
+   uint8 version of the image in the second. Both arrays must the have the
+   *exact* length, or the function returns false.
+
+   Parameters:
+   f32buf: pointer to backbuffer array (must hold width * height * 4 floats)
+   l_f32buf: length of f32buf (in floats)
+   ui8buf: pointer to converted array (must hold width * height * 3 bytes)
+   l_ui8buf: length of ui8buf (in floats)
+
+   Returns:
+   true if screenshot could be copied.
+*/
+DLL bool h3dutScreenshotRaw( char *, int, unsigned char *, int );
 
 /*	Group: Scene graph */
 /* Function: h3dutPickRay

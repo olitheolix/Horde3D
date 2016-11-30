@@ -768,6 +768,51 @@ DLLEXP H3DNode h3dutPickNode( H3DNode cameraNode, float nwx, float nwy )
 
 }
 
+DLLEXP void h3dutGetScreenshotParam( int *width,  int *height ) {
+  h3dGetRenderTargetData( 0, "", 0, width, height, 0x0, 0x0, 0 );
+}
+
+DLLEXP bool h3dutScreenshotRaw( char *f32buf, int l_f32buf, unsigned char *ui8buf, int l_ui8buf )
+  {
+    // Determine width and height.
+    int width, height;
+    h3dGetRenderTargetData( 0, "", 0, &width, &height, 0x0, 0x0, 0 );
+
+    // Determine the number of *bytes* we need to copy an image of
+    // size width * height * 4, when each element is a float.
+    const int num_bytes = width * height * 4 * sizeof(float);
+
+    // Sanity check: Float32 buffer must have correct size.
+    if (l_f32buf != num_bytes) {
+      printf("Error: float buffer has wrong length\n");
+      return false;
+    }
+
+    // Sanity check: UInt8 buffer must have correct size.
+    if (l_ui8buf < width * height * 3) {
+      printf("Error: uint8 buffer has wrong length\n");
+      return false;
+    }
+
+  // Copy the pixels (RGBA, float32).
+  h3dGetRenderTargetData( 0, "", 0, 0x0, 0x0, 0x0, f32buf, num_bytes);
+
+  // To simplify pointer arithmetic.
+  float *ptr_f32 = (float*)f32buf;
+
+  // Convert the Float32 to UInt8, and drop the alpha channel.
+	for( int y = 0; y < height; ++y ) {
+      for( int x = 0; x < width; ++x ) {
+        int idx = y * width + x;
+        ui8buf[idx * 3 + 0] = ftoi_r( clamp( ptr_f32[idx * 4 + 0], 0.f, 1.f ) * 255.f );
+        ui8buf[idx * 3 + 1] = ftoi_r( clamp( ptr_f32[idx * 4 + 1], 0.f, 1.f ) * 255.f );
+        ui8buf[idx * 3 + 2] = ftoi_r( clamp( ptr_f32[idx * 4 + 2], 0.f, 1.f ) * 255.f );
+      }
+  }
+
+  return true;
+}
+
 
 DLLEXP bool h3dutScreenshot( const char *filename )
 {
